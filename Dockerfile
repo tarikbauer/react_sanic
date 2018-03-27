@@ -20,7 +20,6 @@ RUN service mongod start
 
 ADD . ${ROOT_DIR}
 
-
 RUN ${PIP} install -r ${ROOT_DIR}/backend/requirements.txt
 RUN cd ${ROOT_DIR}/frontend && npm install
 
