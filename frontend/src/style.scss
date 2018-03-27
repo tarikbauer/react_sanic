@@ -1,0 +1,12 @@
+@import "../node_modules/bootstrap/scss/bootstrap.scss";
+
+html, body {
+    margin: 0 auto;
+    background-color: whitesmoke;
+    font-size: 15px;
+}
+
+.default-component {
+    background-color: white;
+    margin-top: 10px;
+}
