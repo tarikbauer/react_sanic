@@ -34,7 +34,7 @@ async def before_request(request: Request):
 
 # noinspection PyUnusedLocal
 @app.listener('after_server_start')
-async def create_admin(app_instance: Sanic, loop: uvloop.Loop):
+async def initialize_db(app_instance: Sanic, loop: uvloop.Loop):
     if os.path.exists('/lab_project'):
         os.makedirs('/data/db')
         subprocess.Popen('mongod', shell=True)
