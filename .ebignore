@@ -1,6 +1,6 @@
 .elasticbeanstalk
 .idea
-backend/venv
+venv
 frontend/.cache
 frontend/node_modules
 frontend/src

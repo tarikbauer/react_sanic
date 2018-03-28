@@ -2,7 +2,7 @@ FROM ubuntu:17.10
 
 ENV PIP /venv/bin/pip
 ENV PYTHON /venv/bin/python
-ENV ROOT_DIR /lab_project
+ENV ROOT_DIR /react_sanic
 
 RUN apt update
 RUN apt install -y apt-utils software-properties-common build-essential openssl libffi-dev libssl-dev git vim unzip curl

@@ -11,7 +11,7 @@ from sanic.request import Request
 from sanic.response import html, json
 
 
-app = Sanic('lab_project')
+app = Sanic('react_sanic')
 app.blueprint(api)
 build_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'frontend', 'build')
 app.static('/build', build_dir, name='build')
@@ -35,7 +35,7 @@ async def before_request(request: Request):
 # noinspection PyUnusedLocal
 @app.listener('after_server_start')
 async def initialize_db(app_instance: Sanic, loop: uvloop.Loop):
-    if os.path.exists('/lab_project'):
+    if os.path.exists('/react_sanic'):
         os.makedirs('/data/db')
         subprocess.Popen('mongod', shell=True)
         time.sleep(30)

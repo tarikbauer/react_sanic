@@ -6,4 +6,4 @@ class Config:
 
     def __init__(self):
         client = MongoClient(connect=False)
-        self.mongodb = client.get_database('lab_project').get_collection('users')
+        self.mongodb = client.get_database('react_sanic').get_collection('users')

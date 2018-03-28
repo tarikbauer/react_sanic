@@ -3,7 +3,10 @@ export default class Request {
         return new Promise((resolve, reject) => {
             fetch('http://0.0.0.0:8080/api' + (path.startsWith('/') ? path : '/' + path), {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-apikey': 'd163126c6b834cd0a4ec6417ad00ca1e'
+                },
                 body: JSON.stringify(body),
             }).then(resolve).catch(reject)
         })
