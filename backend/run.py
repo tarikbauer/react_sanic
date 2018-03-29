@@ -3,8 +3,8 @@ import time
 import hashlib
 import uvloop
 import subprocess
-from api import api
-from config import Config
+from backend.api import api
+from backend.config import Config
 from datetime import datetime
 from sanic import Sanic
 from sanic.request import Request
@@ -40,7 +40,7 @@ async def initialize_db(app_instance: Sanic, loop: uvloop.Loop):
         subprocess.Popen('mongod', shell=True)
         time.sleep(30)
         Config.current.mongodb.insert_one({'_id': 'admin', 'password': hashlib.sha256('123mudar@'.encode()).hexdigest(),
-                                           'role': 'root', 'created_at': datetime.utcnow()})
+                                           'role': 'root', 'created_at': datetime.utcnow(), 'username': 'admin'})
 
 
 if __name__ == '__main__':

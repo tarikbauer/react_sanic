@@ -1,6 +1,6 @@
 import uuid
-from config import Config
-from schemas import Login, Register
+from .config import Config
+from .schemas import Login, Register
 from datetime import datetime
 from sanic import Blueprint
 from sanic.request import Request
@@ -12,30 +12,30 @@ api = Blueprint('api', '/api')
 
 @api.route('/register', methods=['POST'])
 def register(request: Request) -> json:
-    data, errors = Register().loads(request.json)
+    data, errors = Register().load(request.json)
     if not errors:
         response = Config.current.mongodb.find_one({'_id': data['cpf']})
         if response:
-            return json({data['cpf']: 'CPF already registered'}, 400)
+            return json({data['cpf']: 'CPF already registered'}, 403)
         token = uuid.uuid4().hex
-        body = {**data, '_id': data['cpf'], 'tokens': {'token': token, 'token_set_at': datetime.utcnow()},
+        body = {**data, '_id': data['cpf'], 'tokens': [{'token': token, 'token_set_at': datetime.utcnow()}],
                 'created_at': datetime.utcnow(), 'role': 'user'}
         Config.current.mongodb.insert_one(body)
-        return json({'token': token})
-    return json(error, 400)
+        return json({'token': token, 'username': data['username']})
+    return json(errors, 400)
 
 
 @api.route('/login', methods=['POST'])
 def login(request: Request) -> json:
-    data, errors = Login().loads(request.json)
+    data, errors = Login().load(request.json)
     if not errors:
         response = Config.current.mongodb.find_one({'_id': data['cpf']})
         if not response:
-            return json({data['cpf']: 'CPF not registered'}, 400)
+            return json({data['cpf']: 'CPF not registered'}, 403)
         if response['password'] != data['password']:
-            return json({'password': 'Password does not match'}, 400)
+            return json({'password': 'Password does not match'}, 403)
         token = uuid.uuid4().hex
         Config.current.mongodb.update_one({'_id': data['cpf']},
                                           {'$push': {'tokens': {'token': token, 'token_set_at': datetime.utcnow()}}})
-        return json({'token': token})
-    return json(error, 400)
+        return json({'token': token, 'username': response['username']})
+    return json(errors, 400)

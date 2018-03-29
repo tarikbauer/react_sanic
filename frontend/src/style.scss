@@ -6,6 +6,10 @@ html, body {
     font-size: 15px;
 }
 
+a, a:hover {
+    text-decoration: none
+}
+
 .default-component {
     background-color: white;
     margin-top: 10px;

@@ -8,3 +8,4 @@ class Login(Schema):
 
 class Register(Login):
     email = fields.Email(required=True)
+    username = fields.String(required=True)

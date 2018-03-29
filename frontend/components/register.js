@@ -3,7 +3,7 @@ import Request from '../helpers/request'
 import $ from 'jquery';
 import Cookies from 'js-cookie'
 
-export default class Login extends Component {
+export default class Register extends Component {
     constructor() {
         super();
         this.request = new Request();
@@ -17,8 +17,9 @@ export default class Login extends Component {
 
     make_post(event) {
         event.preventDefault();
-        let body = {cpf: $('#cpf').val(), password: $('#password').val()};
-        this.request.post('login', body).then((response) => {
+        let body = {cpf: $('#cpf').val(), password: $('#password').val(), username: $('#username').val(),
+            email: $('#email').val()};
+        this.request.post('register', body).then((response) => {
             Cookies.set('username', response.username, {expires: 1});
             Cookies.set('token', response.token, {expires: 1});
             window.location.replace('/user_home');
@@ -30,6 +31,12 @@ export default class Login extends Component {
             <form onSubmit={event => this.make_post(event)}>
                 <div className="form-group">
                     <input type="text" className="form-control" id="cpf" placeholder="CPF" onInput={this.cpf_mask}/>
+                </div>
+                <div className="form-group">
+                    <input type="text" className="form-control" id="username" placeholder="Username"/>
+                </div>
+                <div className="form-group">
+                    <input type="text" className="form-control" id="email" placeholder="Email"/>
                 </div>
                 <div className="form-group">
                     <input type="password" className="form-control" id="password" placeholder="Password"/>

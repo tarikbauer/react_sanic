@@ -8,7 +8,7 @@ export default class Request {
                     'x-apikey': 'd163126c6b834cd0a4ec6417ad00ca1e'
                 },
                 body: JSON.stringify(body),
-            }).then(resolve).catch(reject)
+            }).then(response => resolve(response.json())).catch(error => reject(error.json()))
         })
     }
 }
