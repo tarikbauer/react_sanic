@@ -26,7 +26,7 @@ async def before_request(request: Request):
         pass
     elif request.path in ['/', '/login', '/register']:
         token, user_id = authenticate(request)
-        if user_id:
+        if user_id and request.path == '/login':
             return redirect('/home')
         return home(request)
     else:
