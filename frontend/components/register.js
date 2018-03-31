@@ -4,6 +4,7 @@ import $ from 'jquery';
 import Cookies from 'js-cookie'
 
 export default class Register extends Component {
+
     constructor() {
         super();
         this.request = new Request();
@@ -11,6 +12,7 @@ export default class Register extends Component {
         this.cpf_mask = this.cpf_mask.bind(this)
     }
 
+    // noinspection JSMethodCanBeStatic
     cpf_mask() {
         $('#cpf').mask('000.000.000-00', {reverse: true})
     }
@@ -20,9 +22,11 @@ export default class Register extends Component {
         let body = {cpf: $('#cpf').val(), password: $('#password').val(), username: $('#username').val(),
             email: $('#email').val()};
         this.request.post('register', body).then((response) => {
-            Cookies.set('username', response.username, {expires: 1});
-            Cookies.set('token', response.token, {expires: 1});
-            window.location.replace('/user_home');
+            if (! response.hasOwnProperty('alert')) {
+                Cookies.set('username', response.username, {expires: 1});
+                Cookies.set('token', response.token, {expires: 1});
+            }
+            window.location.replace(response.redirect)
         }).catch((error) => console.log(error))
     }
 
@@ -41,7 +45,7 @@ export default class Register extends Component {
                 <div className="form-group">
                     <input type="password" className="form-control" id="password" placeholder="Password"/>
                 </div>
-                <button type="submit" className="btn btn-primary">Submit</button>
+                <button type="submit" className="btn btn-primary">Register</button>
             </form>
         )
     }

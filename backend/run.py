@@ -1,8 +1,5 @@
 import os
-import time
-import hashlib
-import uvloop
-import subprocess
+import ujson
 from backend.api import api
 from backend.config import Config
 from datetime import datetime
@@ -25,24 +22,23 @@ def home(request: Request) -> html:
 
 @app.middleware('request')
 async def before_request(request: Request):
-    if not (request.path.startswith('/build') or request.path.startswith('/api')):
+    if request.path.startswith('/build') or request.path in ['/api/login', '/api/register']:
+        pass
+    elif request.path in ['/', '/login', '/register']:
         return home(request)
-    if request.path.startswith('/api'):
-        if request.headers.get('x-apikey', '') != 'd163126c6b834cd0a4ec6417ad00ca1e':
-            return json({'apikey': 'Invalid credentials'}, 403)
-
-
-# noinspection PyUnusedLocal
-@app.listener('after_server_start')
-async def initialize_db(app_instance: Sanic, loop: uvloop.Loop):
-    if os.path.exists('/react_sanic'):
-        os.makedirs('/data/db')
-        subprocess.Popen('mongod', shell=True)
-        time.sleep(30)
-        Config.current.mongodb.insert_one({'_id': 'admin', 'password': hashlib.sha256('123mudar@'.encode()).hexdigest(),
-                                           'role': 'root', 'created_at': datetime.utcnow(), 'username': 'admin'})
+    else:
+        token = request.cookies.get('token', '')
+        response = Config.current.tokens.find_one({'_id': token})
+        if not response:
+            return json({'alert': 'Invalid credentials', 'redirect': '/login'}, 403)
+        elif (datetime.utcnow() - response['created_at']).days > 0:
+            return json({'alert': 'Invalid credentials', 'redirect': '/login'}, 403)
+        elif not request.path.startswith('/api'):
+            return home(request)
 
 
 if __name__ == '__main__':
-    Config.current = Config()
-    app.run('0.0.0.0', 8080)
+    with open(os.path.join(os.path.dirname(__file__), 'debug.json'), 'r') as config:
+        loaded_config = ujson.load(config)
+    Config.current = Config(loaded_config)
+    app.run(loaded_config['host'], loaded_config['port'], loaded_config['debug'], workers=loaded_config['workers'])

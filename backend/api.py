@@ -14,14 +14,13 @@ api = Blueprint('api', '/api')
 def register(request: Request) -> json:
     data, errors = Register().load(request.json)
     if not errors:
-        response = Config.current.mongodb.find_one({'_id': data['cpf']})
+        response = Config.current.users.find_one({'_id': data['cpf']})
         if response:
-            return json({data['cpf']: 'CPF already registered'}, 403)
+            return json({'alert': 'CPF already registered'}, 403)
         token = uuid.uuid4().hex
-        body = {**data, '_id': data['cpf'], 'tokens': [{'token': token, 'token_set_at': datetime.utcnow()}],
-                'created_at': datetime.utcnow(), 'role': 'user'}
-        Config.current.mongodb.insert_one(body)
-        return json({'token': token, 'username': data['username']})
+        Config.current.users.insert_one({**data, '_id': data['cpf'], 'created_at': datetime.utcnow(), 'role': 'user'})
+        Config.current.tokens.insert_one({'_id': token, 'created_at': datetime.utcnow(), 'user_id': data['cpf']})
+        return json({'token': token, 'username': data['username'], 'redirect': '/user_home'})
     return json(errors, 400)
 
 
@@ -29,13 +28,20 @@ def register(request: Request) -> json:
 def login(request: Request) -> json:
     data, errors = Login().load(request.json)
     if not errors:
-        response = Config.current.mongodb.find_one({'_id': data['cpf']})
+        response = Config.current.users.find_one({'_id': data['cpf']})
         if not response:
-            return json({data['cpf']: 'CPF not registered'}, 403)
+            return json({'alert': 'CPF not registered'}, 403)
         if response['password'] != data['password']:
-            return json({'password': 'Password does not match'}, 403)
+            return json({'alert': 'Password does not match'}, 403)
         token = uuid.uuid4().hex
-        Config.current.mongodb.update_one({'_id': data['cpf']},
-                                          {'$push': {'tokens': {'token': token, 'token_set_at': datetime.utcnow()}}})
-        return json({'token': token, 'username': response['username']})
+        Config.current.tokens.insert_one({'_id': token, 'created_at': datetime.utcnow(), 'user_id': data['cpf']})
+        return json({'token': token, 'username': response['username'], 'redirect': '/user_home'})
     return json(errors, 400)
+
+
+@api.route('/logout', methods=['POST'])
+def logout(request: Request) -> json:
+    token = request.cookies.get('token')
+    if Config.current.tokens.find_one({'_id': token}):
+        Config.current.tokens.delete_one({'_id': token})
+    return json({'redirect': '/'})

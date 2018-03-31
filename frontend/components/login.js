@@ -1,9 +1,11 @@
 import React, {Component} from 'react';
 import Request from '../helpers/request'
 import $ from 'jquery';
-import Cookies from 'js-cookie'
+import Cookies from 'js-cookie';
+import Alert from 'react-s-alert';
 
 export default class Login extends Component {
+
     constructor() {
         super();
         this.request = new Request();
@@ -11,6 +13,15 @@ export default class Login extends Component {
         this.cpf_mask = this.cpf_mask.bind(this)
     }
 
+    show_alert(message) {
+        Alert.error(message, {
+            position: 'top',
+            effect: 'stackslide',
+            timeout: '3000'
+        });
+    }
+
+    // noinspection JSMethodCanBeStatic
     cpf_mask() {
         $('#cpf').mask('000.000.000-00', {reverse: true})
     }
@@ -19,9 +30,14 @@ export default class Login extends Component {
         event.preventDefault();
         let body = {cpf: $('#cpf').val(), password: $('#password').val()};
         this.request.post('login', body).then((response) => {
-            Cookies.set('username', response.username, {expires: 1});
-            Cookies.set('token', response.token, {expires: 1});
-            window.location.replace('/user_home');
+            if (! response.hasOwnProperty('alert')) {
+                Cookies.set('username', response.username, {expires: 1});
+                Cookies.set('token', response.token, {expires: 1});
+                window.location.replace(response.redirect)
+            }
+            else {
+                this.show_alert(response.alert)
+            }
         }).catch((error) => console.log(error))
     }
 
@@ -34,7 +50,7 @@ export default class Login extends Component {
                 <div className="form-group">
                     <input type="password" className="form-control" id="password" placeholder="Password"/>
                 </div>
-                <button type="submit" className="btn btn-primary">Submit</button>
+                <button type="submit" className="btn btn-primary">Login</button>
             </form>
         )
     }

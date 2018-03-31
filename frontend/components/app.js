@@ -1,7 +1,9 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
+import Alert from 'react-s-alert';
 
 export default class App extends Component {
+
     render() {
         return (
             <section>
@@ -25,6 +27,7 @@ export default class App extends Component {
                 <div className="container-fluid">
                     <div className="default-component card-body">{this.props.children}</div>
                 </div>
+                <Alert stack={{limit: 3}} />
             </section>
         )
     }

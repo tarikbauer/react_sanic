@@ -1,0 +1,11 @@
+{
+  "host": "0.0.0.0",
+  "port": 8079,
+  "debug": false,
+  "workers": 3,
+  "mongodb": {
+    "host": "127.0.0.1",
+    "port": 27017,
+    "database": "react_sanic"
+  }
+}
