@@ -2,39 +2,61 @@ import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import Alert from 'react-s-alert';
 import Request from "../helpers/request";
+import Cookies from "js-cookie";
 
 export default class App extends Component {
 
     constructor() {
         super();
         this.request = new Request();
-        this.state = {
-            first_name: 'Login', first_redirect: '/login',
-            second_name: 'Register', second_redirect: '/register'};
+        this.state = {home_redirect: '/', username: ''};
+        this.make_post = this.make_post.bind(this)
+    }
+
+    make_post(event) {
+        event.preventDefault();
+        this.request.post('logout', {}).then((response) => {
+            Cookies.remove('token');
+            window.location.replace(response.redirect)
+        }).catch((error) => console.log(error))
     }
 
     componentWillMount() {
         this.request.post('is_authenticated', {}).then((response) => {
-            if (response) {
-                this.setState({
-                    first_name: 'Home', first_redirect: '/home',
-                    second_name: 'Logout', second_redirect: '/home'}
-                    );
+            if (response.length) {
+                this.setState({home_redirect: '/home', username: response});
             }
             else {
-                this.setState({
-                    first_name: 'Login', first_redirect: '/login',
-                    second_name: 'Register', second_redirect: '/register'}
-                    );
+                this.setState({home_redirect: '/', username: response});
             }
         }).catch((error) => console.log(error))
     }
 
     render() {
+        let navbar_options;
+        if (this.state.username.length) {
+            navbar_options = (
+                <form onSubmit={event => this.make_post(event)}>
+                    <button type="submit" className="btn btn-outline-info">Logout</button>
+                </form>
+            )
+        }
+        else {
+            navbar_options = (
+                <div className="row">
+                    <Link className="btn-margin" to="/login">
+                        <button className="btn btn-outline-info" type="submit">Login</button>
+                    </Link>
+                    <Link to="/register">
+                        <button className="btn btn-outline-warning" type="submit">Register</button>
+                    </Link>
+                </div>
+            )
+        }
         return (
             <section>
                 <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-                    <Link className="navbar-brand" to="/">Lab Project</Link>
+                    <Link className="navbar-brand" to={this.state.home_redirect}>Lab Project</Link>
                     <button className="navbar-toggler" type="button" data-toggle="collapse"
                             data-target="#navbar-content" aria-controls="navbarSupportedContent" aria-expanded="false"
                             aria-label="Toggle navigation">
@@ -42,18 +64,13 @@ export default class App extends Component {
                     </button>
                     <div className="collapse navbar-collapse" id="navbar-content">
                         <ul className="navbar-nav mr-auto"/>
-                        <Link className="form-inline" to={this.state.first_redirect}>
-                            <button className="btn btn-secondary" type="submit">{this.state.first_name}</button>
-                        </Link>
-                        <Link className="form-inline" to={this.state.second_redirect}>
-                            <button className="btn btn-secondary" type="submit">{this.state.second_name}</button>
-                        </Link>
+                        {navbar_options}
                     </div>
                 </nav>
                 <div className="container-fluid">
                     <div className="default-component card-body">{this.props.children}</div>
                 </div>
-                <Alert stack={{limit: 3}} />
+                <Alert stack={{limit: 1}} timeout={4000} />
             </section>
         )
     }

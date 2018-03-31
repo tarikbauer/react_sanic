@@ -32,7 +32,6 @@ export default class Login extends Component {
                 this.show_alert(response.alert)
             }
             else {
-                Cookies.set('username', response.username, {expires: 1});
                 Cookies.set('token', response.token, {expires: 1});
                 window.location.replace(response.redirect)
             }
