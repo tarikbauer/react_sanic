@@ -17,11 +17,9 @@ export default class Login extends Component {
         Alert.error(message, {
             position: 'top',
             effect: 'stackslide',
-            timeout: '3000'
         });
     }
 
-    // noinspection JSMethodCanBeStatic
     cpf_mask() {
         $('#cpf').mask('000.000.000-00', {reverse: true})
     }
@@ -30,13 +28,13 @@ export default class Login extends Component {
         event.preventDefault();
         let body = {cpf: $('#cpf').val(), password: $('#password').val()};
         this.request.post('login', body).then((response) => {
-            if (! response.hasOwnProperty('alert')) {
+            if (response.hasOwnProperty('alert')) {
+                this.show_alert(response.alert)
+            }
+            else {
                 Cookies.set('username', response.username, {expires: 1});
                 Cookies.set('token', response.token, {expires: 1});
                 window.location.replace(response.redirect)
-            }
-            else {
-                this.show_alert(response.alert)
             }
         }).catch((error) => console.log(error))
     }

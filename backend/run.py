@@ -2,10 +2,10 @@ import os
 import ujson
 from backend.api import api
 from backend.config import Config
-from datetime import datetime
+from backend.helper import authenticate
 from sanic import Sanic
 from sanic.request import Request
-from sanic.response import html, json
+from sanic.response import html, redirect
 
 
 app = Sanic('react_sanic')
@@ -22,17 +22,16 @@ def home(request: Request) -> html:
 
 @app.middleware('request')
 async def before_request(request: Request):
-    if request.path.startswith('/build') or request.path in ['/api/login', '/api/register']:
+    if request.path.startswith('/build') or request.path in ['/api/login', '/api/register', '/api/is_authenticated']:
         pass
-    elif request.path in ['/', '/login', '/register']:
+    elif request.path in ['/', '/register']:
         return home(request)
     else:
-        token = request.cookies.get('token', '')
-        response = Config.current.tokens.find_one({'_id': token})
-        if not response:
-            return json({'alert': 'Invalid credentials', 'redirect': '/login'}, 403)
-        elif (datetime.utcnow() - response['created_at']).days > 0:
-            return json({'alert': 'Invalid credentials', 'redirect': '/login'}, 403)
+        token, user_id = authenticate(request)
+        if not user_id:
+            return redirect('/login')
+        if request.path == '/login':
+            return redirect('/home')
         elif not request.path.startswith('/api'):
             return home(request)
 

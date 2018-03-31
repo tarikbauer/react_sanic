@@ -1,5 +1,6 @@
 import uuid
 from .config import Config
+from .helper import authenticate
 from .schemas import Login, Register
 from datetime import datetime
 from sanic import Blueprint
@@ -8,6 +9,12 @@ from sanic.response import json
 
 
 api = Blueprint('api', '/api')
+
+
+@api.route('/is_authenticated', methods=['POST'])
+def is_authenticated(request: Request) -> json:
+    token, user_id = authenticate(request)
+    return json(True, 201) if user_id else json(False, 202)
 
 
 @api.route('/register', methods=['POST'])
@@ -20,7 +27,7 @@ def register(request: Request) -> json:
         token = uuid.uuid4().hex
         Config.current.users.insert_one({**data, '_id': data['cpf'], 'created_at': datetime.utcnow(), 'role': 'user'})
         Config.current.tokens.insert_one({'_id': token, 'created_at': datetime.utcnow(), 'user_id': data['cpf']})
-        return json({'token': token, 'username': data['username'], 'redirect': '/user_home'})
+        return json({'token': token, 'username': data['username'], 'redirect': '/home'})
     return json(errors, 400)
 
 
@@ -34,8 +41,9 @@ def login(request: Request) -> json:
         if response['password'] != data['password']:
             return json({'alert': 'Password does not match'}, 403)
         token = uuid.uuid4().hex
+        username = response['username']
         Config.current.tokens.insert_one({'_id': token, 'created_at': datetime.utcnow(), 'user_id': data['cpf']})
-        return json({'token': token, 'username': response['username'], 'redirect': '/user_home'})
+        return json({'token': token, 'username': username, 'redirect': '/home'})
     return json(errors, 400)
 
 

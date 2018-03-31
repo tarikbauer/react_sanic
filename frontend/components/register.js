@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import Request from '../helpers/request'
 import $ from 'jquery';
 import Cookies from 'js-cookie'
+import Alert from "react-s-alert";
 
 export default class Register extends Component {
 
@@ -12,7 +13,13 @@ export default class Register extends Component {
         this.cpf_mask = this.cpf_mask.bind(this)
     }
 
-    // noinspection JSMethodCanBeStatic
+    show_alert(message) {
+        Alert.error(message, {
+            position: 'top',
+            effect: 'stackslide',
+        });
+    }
+
     cpf_mask() {
         $('#cpf').mask('000.000.000-00', {reverse: true})
     }
@@ -22,11 +29,14 @@ export default class Register extends Component {
         let body = {cpf: $('#cpf').val(), password: $('#password').val(), username: $('#username').val(),
             email: $('#email').val()};
         this.request.post('register', body).then((response) => {
-            if (! response.hasOwnProperty('alert')) {
+            if (response.hasOwnProperty('alert')) {
+                this.show_alert(response.alert)
+            }
+            else {
                 Cookies.set('username', response.username, {expires: 1});
                 Cookies.set('token', response.token, {expires: 1});
+                window.location.replace(response.redirect)
             }
-            window.location.replace(response.redirect)
         }).catch((error) => console.log(error))
     }
 

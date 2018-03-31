@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import Cookies from 'js-cookie'
-import $ from "jquery";
 import Request from "../helpers/request";
 
 export default class UserHome extends Component {
@@ -13,8 +12,7 @@ export default class UserHome extends Component {
 
     make_post(event) {
         event.preventDefault();
-        let body = {cpf: $('#cpf').val(), password: $('#password').val()};
-        this.request.post('logout', body).then((response) => {
+        this.request.post('logout', {}).then((response) => {
             Cookies.remove('username');
             Cookies.remove('token');
             window.location.replace(response.redirect)
@@ -26,7 +24,7 @@ export default class UserHome extends Component {
             <div>
                 <h1>Welcome {Cookies.get('username')}</h1>
                 <form onSubmit={event => this.make_post(event)}>
-                    <button type="submit" className="btn btn-primary">Logout</button>
+                    <button type="submit" className="btn btn-info">Logout</button>
                 </form>
             </div>
         )

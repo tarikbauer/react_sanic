@@ -1,8 +1,23 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import Alert from 'react-s-alert';
+import Request from "../helpers/request";
 
 export default class App extends Component {
+
+    constructor() {
+        super();
+        this.request = new Request();
+        this.redirect = '/login';
+    }
+
+    componentWillMount() {
+        this.request.post('is_authenticated', {}).then((response) => {
+            if (response) {
+                this.redirect = '/home';
+            }
+        }).catch((error) => console.log(error))
+    }
 
     render() {
         return (
@@ -16,11 +31,11 @@ export default class App extends Component {
                     </button>
                     <div className="collapse navbar-collapse" id="navbar-content">
                         <ul className="navbar-nav mr-auto"/>
-                        <Link className="form-inline" to="/login">
-                            <button className="btn btn-outline-success" type="submit">Login</button>
+                        <Link className="form-inline" to={this.redirect}>
+                            <button className="btn btn-secondary" type="submit">Login</button>
                         </Link>
                         <Link className="form-inline" to="/register">
-                            <button className="btn btn-outline-info" type="submit">Register</button>
+                            <button className="btn btn-secondary" type="submit">Register</button>
                         </Link>
                     </div>
                 </nav>
