@@ -8,13 +8,24 @@ export default class App extends Component {
     constructor() {
         super();
         this.request = new Request();
-        this.redirect = '/login';
+        this.state = {
+            first_name: 'Login', first_redirect: '/login',
+            second_name: 'Register', second_redirect: '/register'};
     }
 
     componentWillMount() {
         this.request.post('is_authenticated', {}).then((response) => {
             if (response) {
-                this.redirect = '/home';
+                this.setState({
+                    first_name: 'Home', first_redirect: '/home',
+                    second_name: 'Logout', second_redirect: '/home'}
+                    );
+            }
+            else {
+                this.setState({
+                    first_name: 'Login', first_redirect: '/login',
+                    second_name: 'Register', second_redirect: '/register'}
+                    );
             }
         }).catch((error) => console.log(error))
     }
@@ -31,11 +42,11 @@ export default class App extends Component {
                     </button>
                     <div className="collapse navbar-collapse" id="navbar-content">
                         <ul className="navbar-nav mr-auto"/>
-                        <Link className="form-inline" to={this.redirect}>
-                            <button className="btn btn-secondary" type="submit">Login</button>
+                        <Link className="form-inline" to={this.state.first_redirect}>
+                            <button className="btn btn-secondary" type="submit">{this.state.first_name}</button>
                         </Link>
-                        <Link className="form-inline" to="/register">
-                            <button className="btn btn-secondary" type="submit">Register</button>
+                        <Link className="form-inline" to={this.state.second_redirect}>
+                            <button className="btn btn-secondary" type="submit">{this.state.second_name}</button>
                         </Link>
                     </div>
                 </nav>

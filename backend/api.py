@@ -14,7 +14,7 @@ api = Blueprint('api', '/api')
 @api.route('/is_authenticated', methods=['POST'])
 def is_authenticated(request: Request) -> json:
     token, user_id = authenticate(request)
-    return json(True, 201) if user_id else json(False, 202)
+    return json(True) if user_id else json(False)
 
 
 @api.route('/register', methods=['POST'])
