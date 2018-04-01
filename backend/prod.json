@@ -4,7 +4,7 @@
   "debug": false,
   "workers": 3,
   "mongodb": {
-    "host": "127.0.0.1",
+    "host": "mongodb://ec2-54-173-115-152.compute-1.amazonaws.com:27017",
     "port": 27017,
     "database": "react_sanic"
   }
