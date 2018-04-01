@@ -8,7 +8,6 @@ export default class App extends Component {
 
     constructor() {
         super();
-        console.log('will');
         this.request = new Request();
         this.state = {home_redirect: '/', username: ''};
         this.make_post = this.make_post.bind(this)
@@ -23,13 +22,12 @@ export default class App extends Component {
     }
 
     componentWillMount() {
-        console.log('will');
         this.request.post('is_authenticated', {}).then((response) => {
             if (response.length) {
-                this.state = {home_redirect: '/home', username: response};
+                this.setState({home_redirect: '/home', username: response});
             }
             else {
-                this.state = {home_redirect: '/', username: response};
+                this.setState({home_redirect: '/', username: response});
             }
         }).catch((error) => console.log(error))
     }
