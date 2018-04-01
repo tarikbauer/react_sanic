@@ -10,7 +10,7 @@ from sanic.response import html, redirect
 
 app = Sanic('react_sanic')
 app.blueprint(api)
-build_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'frontend', 'build')
+build_dir = os.path.join(os.path.dirname(__file__), 'frontend', 'build')
 app.static('/build', build_dir, name='build')
 
 
@@ -38,7 +38,7 @@ async def before_request(request: Request):
 
 
 if __name__ == '__main__':
-    with open(os.path.join(os.path.dirname(__file__), 'debug.json'), 'r') as config:
+    with open(os.path.join(os.path.dirname(__file__), 'backend', 'debug.json'), 'r') as config:
         loaded_config = ujson.load(config)
     Config.current = Config(loaded_config)
     app.run(loaded_config['host'], loaded_config['port'], loaded_config['debug'], workers=loaded_config['workers'])
