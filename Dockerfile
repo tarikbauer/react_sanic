@@ -20,4 +20,4 @@ RUN cd ${ROOT_DIR}/frontend && npm install
 
 EXPOSE 8079
 
-CMD ${PYTHON} ${ROOT_DIR}/backend/run.py
+CMD ${PYTHON} ${ROOT_DIR}/run.py
