@@ -3,6 +3,7 @@ import ujson
 from backend.api import api
 from backend.config import Config
 from backend.helper import authenticate
+from backend.worker import TokenCleaner
 from sanic import Sanic
 from sanic.request import Request
 from sanic.response import html, redirect
@@ -38,7 +39,8 @@ async def before_request(request: Request):
 
 
 if __name__ == '__main__':
-    with open(os.path.join(os.path.dirname(__file__), 'backend', 'prod.json'), 'r') as config:
+    with open(os.path.join(os.path.dirname(__file__), 'backend', 'debug.json'), 'r') as config:
         loaded_config = ujson.load(config)
     Config.current = Config(loaded_config)
+    TokenCleaner().start()
     app.run(loaded_config['host'], loaded_config['port'], loaded_config['debug'], workers=loaded_config['workers'])

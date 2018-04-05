@@ -1,58 +1,29 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
+import Cookies from "js-cookie";
 import Alert from 'react-s-alert';
 import Request from "../helpers/request";
-import Cookies from "js-cookie";
+import UserLoggedIn from './logged_in_user';
+import UserLoggedOut from './logged_out_user';
 
 export default class App extends Component {
 
     constructor() {
         super();
         this.request = new Request();
-        this.state = {home_redirect: '/', username: ''};
-        this.make_post = this.make_post.bind(this)
-    }
-
-    make_post(event) {
-        event.preventDefault();
-        this.request.post('logout', {}).then((response) => {
-            Cookies.remove('token');
-            window.location.replace(response.redirect)
-        }).catch((error) => console.log(error))
+        this.state = {home_redirect: '/', username: '', button: <UserLoggedOut/>};
     }
 
     componentWillMount() {
         this.request.post('is_authenticated', {}).then((response) => {
-            if (response.length) {
-                this.setState({home_redirect: '/home', username: response});
-            }
-            else {
-                this.setState({home_redirect: '/', username: response});
-            }
+            if (response)
+                this.setState({home_redirect: '/home', username: Cookies.get('username'), button: <UserLoggedIn/>});
+            else
+                this.setState({home_redirect: '/', username: '', button: <UserLoggedOut/>});
         }).catch((error) => console.log(error))
     }
 
     render() {
-        let navbar_options;
-        if (this.state.username.length) {
-            navbar_options = (
-                <form onSubmit={event => this.make_post(event)}>
-                    <button type="submit" className="btn btn-outline-info">Logout</button>
-                </form>
-            )
-        }
-        else {
-            navbar_options = (
-                <div className="row">
-                    <Link className="btn-margin" to="/login">
-                        <button className="btn btn-outline-info" type="submit">Login</button>
-                    </Link>
-                    <Link to="/register">
-                        <button className="btn btn-outline-warning" type="submit">Register</button>
-                    </Link>
-                </div>
-            )
-        }
         return (
             <section>
                 <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -64,7 +35,7 @@ export default class App extends Component {
                     </button>
                     <div className="collapse navbar-collapse" id="navbar-content">
                         <ul className="navbar-nav mr-auto"/>
-                        {navbar_options}
+                        {this.state.button}
                     </div>
                 </nav>
                 <div className="container-fluid">

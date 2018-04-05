@@ -15,8 +15,8 @@ export default class Register extends Component {
 
     show_alert(message) {
         Alert.error(message, {
-            position: 'top',
-            effect: 'stackslide',
+            position: 'top-right',
+            effect: 'slide',
         });
     }
 
@@ -34,6 +34,7 @@ export default class Register extends Component {
             }
             else {
                 Cookies.set('token', response.token, {expires: 1});
+                Cookies.set('username', response.username, {expires: 1});
                 window.location.replace(response.redirect)
             }
         }).catch((error) => console.log(error))

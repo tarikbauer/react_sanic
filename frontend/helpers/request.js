@@ -2,7 +2,7 @@ export default class Request {
 
     post(path, body) {
         return new Promise((resolve, reject) => {
-            fetch('http://0.0.0.0:8079/api' + (path.startsWith('/') ? path : '/' + path), {
+            fetch('http://127.0.0.1:8079/api' + (path.startsWith('/') ? path : '/' + path), {
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: {'Content-Type': 'application/json'},
