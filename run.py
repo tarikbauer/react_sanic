@@ -39,7 +39,7 @@ async def before_request(request: Request):
 
 
 if __name__ == '__main__':
-    with open(os.path.join(os.path.dirname(__file__), 'backend', 'debug.json'), 'r') as config:
+    with open(os.path.join(os.path.dirname(__file__), 'backend', 'prod.json'), 'r') as config:
         loaded_config = ujson.load(config)
     Config.current = Config(loaded_config)
     TokenCleaner().start()
