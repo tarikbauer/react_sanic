@@ -29,7 +29,7 @@ def register(request: Request) -> json:
         token = uuid.uuid4().hex
         Config.current.users.insert_one({**data, '_id': data['cpf'], 'created_at': datetime.utcnow(), 'role': 'user'})
         Config.current.tokens.insert_one({'_id': token, 'created_at': datetime.utcnow(), 'user_id': data['cpf']})
-        return json({'token': token, 'redirect': '/home', 'username': data['username']})
+        return json({'token': token, 'username': data['username']})
     if 'email' in errors:
         return json({'alert': 'Invalid email'}, 403)
     return json(errors, 400)
@@ -46,7 +46,7 @@ def login(request: Request) -> json:
             return json({'alert': 'Password does not match'}, 403)
         token = uuid.uuid4().hex
         Config.current.tokens.insert_one({'_id': token, 'created_at': datetime.utcnow(), 'user_id': data['cpf']})
-        return json({'token': token, 'redirect': '/home', 'username': response['username']})
+        return json({'token': token, 'username': response['username']})
     return json(errors, 400)
 
 
@@ -55,4 +55,27 @@ def logout(request: Request) -> json:
     token = request.cookies.get('token')
     if Config.current.tokens.find_one({'_id': token}):
         Config.current.tokens.delete_one({'_id': token})
-    return json({'redirect': '/'})
+    return json({})
+
+
+@api.route('/get_scores', methods=['POST'])
+def get_scores(request: Request) -> json:
+    subjects = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o']
+    import random
+    response = []
+    for label in request.json:
+        response.append({
+            'name': label['value'],
+            'labels': [random.choice(subjects),
+                       random.choice(subjects),
+                       random.choice(subjects),
+                       random.choice(subjects),
+                       random.choice(subjects),
+                       random.choice(subjects)],
+            'data': [random.choice(range(10)),
+                     random.choice(range(10)),
+                     random.choice(range(10)),
+                     random.choice(range(10)),
+                     random.choice(range(10)),
+                     random.choice(range(10))]})
+    return json(response)

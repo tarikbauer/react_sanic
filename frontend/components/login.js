@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
-import Request from '../helpers/request'
 import $ from 'jquery';
 import Cookies from 'js-cookie';
 import Alert from 'react-s-alert';
+import Request from '../helpers/request';
 
 export default class Login extends Component {
 
@@ -34,7 +34,7 @@ export default class Login extends Component {
             else {
                 Cookies.set('token', response.token, {expires: 1});
                 Cookies.set('username', response.username, {expires: 1});
-                window.location.replace(response.redirect)
+                window.location.replace('/home')
             }
         }).catch((error) => console.log(error))
     }

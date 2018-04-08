@@ -2,6 +2,7 @@
 @import '../node_modules/react-s-alert/dist/s-alert-default.css';
 @import '../node_modules/react-s-alert/dist/s-alert-css-effects/slide.css';
 @import '../node_modules/font-awesome/css/font-awesome.min.css';
+@import '../node_modules/react-select/dist/react-select.min.css';
 
 html, body {
     margin: 0 auto;
@@ -13,12 +14,34 @@ a, a:hover {
     text-decoration: none
 }
 
-.btn-margin {
-    margin-right: 10px;
+.relative {
+    position: relative;
 }
 
-.row {
+.element-bottom {
+    position: absolute;
+    bottom: 0;
+}
+
+.navbar-center {
+    position: absolute;
+    left: 43%;
+}
+
+.margin-right-0 {
     margin-right: 0;
+}
+
+.margin-right-1 {
+    margin-right: 1px;
+}
+
+.margin-right-5 {
+    margin-right: 5px;
+}
+
+.margin-top-25 {
+    margin-top: 25px;
 }
 
 .default-component {
