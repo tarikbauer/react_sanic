@@ -1,7 +1,10 @@
 import React, {Component} from 'react';
 import Select from 'react-select';
 import Request from '../helpers/request';
-import {Bar} from 'react-chartjs-2';
+import FaultsChart from './faults_chart';
+import ScoresChart from './scores_chart';
+import show_alert from '../helpers/utils';
+
 
 export default class UserHome extends Component {
 
@@ -9,48 +12,59 @@ export default class UserHome extends Component {
         super(props);
         this.request = new Request();
         this.make_post = this.make_post.bind(this);
-        this.state = {
-            bars: [],
-            targets: ['Notas', 'Faltas'],
-            selected_target: '',
-            filters: ['01/2015', '02/2015', '02/2016', '02/2016',
-                '01/2017', '02/2017', '01/2018', '02/2018'],
+        this.state = {scores: [], faults: null, targets: ['Notas', 'Faltas'], selected_target: '', filters: [],
             selected_filters: []}
     }
 
-    create_bar(name, labels, data) {
-        let bar_content = {
-            labels: labels,
-            datasets: [
-                {
-                    label: name,
-                    backgroundColor: 'rgba(255,99,132,0.2)',
-                    borderColor: 'rgba(255,99,132,1)',
-                    borderWidth: 1,
-                    hoverBackgroundColor: 'rgba(255,99,132,0.4)',
-                    hoverBorderColor: 'rgba(255,99,132,1)',
-                    data: data
-                }]};
-        return (
-            <div className="col-6 margin-top-25">
-                <Bar data={bar_content}/>
-            </div>
-        )
+    componentWillMount() {
+        this.request.post('get_year_range', {}).then(response => {
+            this.setState({filters: response})
+        }).catch(error => console.log(error));
     }
 
     make_post(event) {
         event.preventDefault();
-        this.request.post(this.state.selected_target.value, this.state.selected_filters).then((response) => {
-            response.map(value => {
-                let new_bars = this.state.bars.concat(this.create_bar(value.name, value.labels, value.data));
-                this.setState({bars: new_bars})
-            })
-        }).catch((error) => console.log(error));
-        this.setState({bars: [], selected_target: '', selected_filters: []})
+        let api_path = this.state.selected_target.value;
+        if (api_path && this.state.selected_filters.length !== 0) {
+            this.request.post(api_path, this.state.selected_filters).then(response => {
+                if (api_path === 'get_scores') {
+                    response.map(value => {
+                        let new_score = this.state.scores.concat(<ScoresChart name={value.name} labels={value.labels}
+                                                                              data={value.data}/>);
+                        this.setState({scores: new_score})
+                    })
+                }
+                else {
+                    this.setState({faults: <FaultsChart name={response.name} labels={response.labels}
+                                                        data={response.data}/>})
+                }
+            }).catch(error => console.log(error));
+        this.setState({scores: [], faults: null, selected_target: '', selected_filters: []})
+        }
+        else {
+            show_alert('Unfilled input')
+        }
     }
 
     render() {
         let api_path = '';
+        let chart = null;
+        if (this.state.scores.length) chart = (
+            <div className="margin-top-25">
+                <h4>Results:</h4>
+                <div className="row">
+                    {this.state.scores.map(value => {return value})}
+                </div>
+            </div>
+        );
+        if (this.state.faults) chart = (
+            <div className="margin-top-25">
+                <h4>Result:</h4>
+                <div className="row">
+                    {this.state.faults}
+                </div>
+            </div>
+        );
         return (
             <div>
                 <div className="row">
@@ -58,18 +72,16 @@ export default class UserHome extends Component {
                         <h3>Target</h3>
                         <Select options={this.state.targets.map(value => {
                             value === 'Notas' ? api_path = 'get_scores' : api_path = 'get_faults';
-                            return {label: value, value: api_path}
-                        })}
-                                onChange={(value) => this.setState({selected_target: value})}
+                            return {label: value, value: api_path}})}
+                                onChange={value => {(!value) ? this.setState({selected_target: ''}) :
+                                    this.setState({selected_target: value})}}
                                 value={this.state.selected_target}/>
                     </div>
                     <div className="col-6">
                         <h3>Filters</h3>
-                        <Select multi={true}
-                                // ref={(select) => {if (select) select.setState({isOpen: true})}}
+                        <Select multi={true} closeOnSelect={false} value={this.state.selected_filters}
                                 options={this.state.filters.map(value => {return {label: value, value: value}})}
-                                onChange={(values) => this.setState({selected_filters: values})}
-                                value={this.state.selected_filters}/>
+                                onChange={(values) => this.setState({selected_filters: values})}/>
                     </div>
                     <div className="col-1 relative">
                         <a href="" className="element-bottom" onClick={(event) => this.make_post(event)}>
@@ -77,15 +89,7 @@ export default class UserHome extends Component {
                         </a>
                     </div>
                 </div>
-                {this.state.bars.length ?
-                    <div className="margin-top-25">
-                        <h4>Results:</h4>
-                        <div className="row">
-                            {this.state.bars.map(value => {return value})}
-                        </div>
-                    </div>
-                    : null
-                }
+                {chart}
             </div>
         );
     }

@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import $ from 'jquery';
 import Cookies from 'js-cookie'
-import Alert from "react-s-alert";
 import Request from '../helpers/request';
+import show_alert from '../helpers/utils';
 
 export default class Register extends Component {
 
@@ -11,13 +11,6 @@ export default class Register extends Component {
         this.request = new Request();
         this.make_post = this.make_post.bind(this);
         this.cpf_mask = this.cpf_mask.bind(this)
-    }
-
-    show_alert(message) {
-        Alert.error(message, {
-            position: 'top-right',
-            effect: 'slide',
-        });
     }
 
     cpf_mask() {
@@ -30,7 +23,7 @@ export default class Register extends Component {
             email: $('#email').val()};
         this.request.post('register', body).then((response) => {
             if (response.hasOwnProperty('alert')) {
-                this.show_alert(response.alert)
+                show_alert(response.alert)
             }
             else {
                 Cookies.set('token', response.token, {expires: 1});

@@ -58,24 +58,37 @@ def logout(request: Request) -> json:
     return json({})
 
 
+@api.route('/get_year_range', methods=['POST'])
+def get_year_range(request: Request) -> json:
+    return json(['01/2015', '02/2015', '02/2016', '02/2016', '01/2017', '02/2017', '01/2018', '02/2018'])
+
+
+@api.route('/get_faults', methods=['POST'])
+def get_faults(request: Request) -> json:
+    import random
+    data = []
+    for label in request.json:
+        data.append(random.choice(range(121)))
+    response = {'name': 'faults', 'labels': list(map(lambda x: x['value'], request.json)), 'data': data}
+    return json(response)
+
+
 @api.route('/get_scores', methods=['POST'])
 def get_scores(request: Request) -> json:
     subjects = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o']
     import random
     response = []
     for label in request.json:
+        average, index = 0, 0
+        data = [random.choice(range(10)), random.choice(range(10)), random.choice(range(10)),
+                random.choice(range(10)), random.choice(range(10)), random.choice(range(10))]
+        for index, value in enumerate(data):
+            average += value
+        average = round(average / (index + 1), 2)
+        data.append(average)
         response.append({
             'name': label['value'],
-            'labels': [random.choice(subjects),
-                       random.choice(subjects),
-                       random.choice(subjects),
-                       random.choice(subjects),
-                       random.choice(subjects),
-                       random.choice(subjects)],
-            'data': [random.choice(range(10)),
-                     random.choice(range(10)),
-                     random.choice(range(10)),
-                     random.choice(range(10)),
-                     random.choice(range(10)),
-                     random.choice(range(10))]})
+            'labels': [random.choice(subjects), random.choice(subjects), random.choice(subjects),
+                       random.choice(subjects), random.choice(subjects), random.choice(subjects), 'average'],
+            'data': data})
     return json(response)
