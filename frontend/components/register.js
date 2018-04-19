@@ -23,7 +23,7 @@ export default class Register extends Component {
             email: $('#email').val()};
         this.request.post('register', body).then((response) => {
             if (response.hasOwnProperty('alert')) {
-                show_alert(response.alert)
+                response.alert.map(alert => show_alert(alert))
             }
             else {
                 Cookies.set('token', response.token, {expires: 1});

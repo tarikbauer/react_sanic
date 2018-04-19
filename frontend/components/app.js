@@ -46,7 +46,7 @@ export default class App extends Component {
                 <div className="container-fluid">
                     <div className="default-component card-body">{this.props.children}</div>
                 </div>
-                <Alert stack={{limit: 1}} timeout={4000}/>
+                <Alert stack={{limit: 3}} timeout={3500}/>
             </section>
         )
     }

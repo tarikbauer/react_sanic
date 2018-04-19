@@ -22,7 +22,7 @@ export default class Login extends Component {
         let body = {cpf: $('#cpf').val(), password: $('#password').val()};
         this.request.post('login', body).then((response) => {
             if (response.hasOwnProperty('alert')) {
-                show_alert(response.alert)
+                response.alert.map(alert => show_alert(alert))
             }
             else {
                 Cookies.set('token', response.token, {expires: 1});

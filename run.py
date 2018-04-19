@@ -24,14 +24,13 @@ def home(request: Request) -> html:
 @app.middleware('request')
 async def before_request(request: Request):
     if request.path.startswith('/build') or request.path in ['/api/login', '/api/register', '/api/is_authenticated']:
-        pass
-    elif request.path in ['/', '/login', '/register']:
-        token, user_id = authenticate(request)
+        return None
+    token, user_id = authenticate(request)
+    if request.path in ['/', '/login', '/register']:
         if user_id and request.path == '/login':
             return redirect('/home')
         return home(request)
     else:
-        token, user_id = authenticate(request)
         if not user_id:
             return redirect('/login')
         elif not request.path.startswith('/api'):

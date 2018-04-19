@@ -13,6 +13,13 @@ def authenticate(request: Request) -> tuple:
     return token, response['user_id']
 
 
+def parse_errors(errors: dict) -> list:
+    alerts = []
+    for alert in errors:
+        alerts.extend(list(map(lambda x: x[:-1], errors[alert])))
+    return alerts
+
+
 def get_verifier(factors: list, cpf: list) -> int:
     verifier = 0
     for index, factor in enumerate(factors):
