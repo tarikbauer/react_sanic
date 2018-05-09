@@ -1,6 +1,7 @@
 import uuid
 from .config import Config
-from .helper import authenticate, parse_errors
+from .generate_content import generate_content
+from .helper import authenticate, parse_errors, encrypt_password, get_user_info, get_subject_average
 from .schemas import Login, Register
 from datetime import datetime
 from sanic import Blueprint
@@ -21,13 +22,17 @@ def is_authenticated(request: Request) -> json:
 def register(request: Request) -> json:
     data, errors = Register().load(request.json)
     if not errors:
-        response = Config.current.users.find_one({'_id': data['cpf']})
+        response = Config.current.users.find_one({'_id': data['usercode']})
         if response:
-            return json({'alert': ['CPF already registered']}, 403)
+            return json({'alert': ['User already registered']}, 403)
         token = uuid.uuid4().hex
-        Config.current.users.insert_one({**data, '_id': data['cpf'], 'created_at': datetime.utcnow(), 'role': 'user'})
-        Config.current.tokens.insert_one({'_id': token, 'created_at': datetime.utcnow(), 'user_id': data['cpf']})
-        return json({'token': token, 'username': data['username']})
+        data['password'] = encrypt_password(data['password'])
+        content = generate_content()
+        data.update({'content': content})
+        Config.current.users.insert_one({**data, '_id': data['usercode'], 'created_at': datetime.utcnow(),
+                                         'role': 'student'})
+        Config.current.tokens.insert_one({'_id': token, 'created_at': datetime.utcnow(), 'user_id': data['usercode']})
+        return json({'token': token, 'name': data['military_name']})
     return json({'alert': parse_errors(errors)}, 403)
 
 
@@ -35,14 +40,14 @@ def register(request: Request) -> json:
 def login(request: Request) -> json:
     data, errors = Login().load(request.json)
     if not errors:
-        response = Config.current.users.find_one({'_id': data['cpf']})
+        response = Config.current.users.find_one({'_id': data['usercode']})
         if not response:
-            return json({'alert': ['CPF not registered']}, 403)
-        if response['password'] != data['password']:
+            return json({'alert': ['User not registered']}, 403)
+        if response['password'] != encrypt_password(data['password']):
             return json({'alert': ['Password does not match']}, 403)
         token = uuid.uuid4().hex
-        Config.current.tokens.insert_one({'_id': token, 'created_at': datetime.utcnow(), 'user_id': data['cpf']})
-        return json({'token': token, 'username': response['username']})
+        Config.current.tokens.insert_one({'_id': token, 'created_at': datetime.utcnow(), 'user_id': data['usercode']})
+        return json({'token': token, 'name': response['military_name']})
     return json({'alert': parse_errors(errors)}, 403)
 
 
@@ -54,37 +59,60 @@ def logout(request: Request) -> json:
     return json({})
 
 
-@api.route('/get_year_range', methods=['POST'])
-def get_year_range(request: Request) -> json:
-    return json(['01/2015', '02/2015', '02/2016', '02/2016', '01/2017', '02/2017', '01/2018', '02/2018'])
+@api.route('/get_years', methods=['POST'])
+def get_years(request: Request) -> json:
+    user = get_user_info(request)
+    years = list(map(lambda x: x, user['content']))
+    return json(years)
+
+
+@api.route('/get_subjects', methods=['POST'])
+def get_subjects(request: Request) -> json:
+    subjects = []
+    user = get_user_info(request)
+    for year in user['content']:
+        subjects.extend(list(map(lambda x: list(x.keys())[0], user['content'][year]['scores'])))
+    return json(subjects)
 
 
 @api.route('/get_faults', methods=['POST'])
 def get_faults(request: Request) -> json:
-    import random
     data = []
-    for label in request.json:
-        data.append(random.choice(range(121)))
-    response = {'name': 'faults', 'labels': list(map(lambda x: x['value'], request.json)), 'data': data}
+    user = get_user_info(request)
+    years = list(map(lambda x: x, user['content']))
+    for year in years:
+        data.append(user['content'][year]['faults'])
+    response = {'name': 'Faults', 'labels': years, 'data': data}
     return json(response)
 
 
-@api.route('/get_scores', methods=['POST'])
-def get_scores(request: Request) -> json:
-    subjects = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o']
-    import random
+@api.route('/get_subject_scores', methods=['POST'])
+def get_subject_scores(request: Request) -> json:
     response = []
-    for label in request.json:
-        average, index = 0, 0
-        data = [random.choice(range(10)), random.choice(range(10)), random.choice(range(10)),
-                random.choice(range(10)), random.choice(range(10)), random.choice(range(10))]
-        for index, value in enumerate(data):
-            average += value
-        average = round(average / (index + 1), 2)
-        data.append(average)
-        response.append({
-            'name': label['value'],
-            'labels': [random.choice(subjects), random.choice(subjects), random.choice(subjects),
-                       random.choice(subjects), random.choice(subjects), random.choice(subjects), 'average'],
-            'data': data})
+    user = get_user_info(request)
+    subjects = list(map(lambda x: x['value'], request.json))
+    for year, content in user['content'].items():
+        for scores in list(filter(lambda x: list(x.keys())[0] in subjects, content['scores'])):
+            for subject, score in scores.items():
+                response.append({'name': subject, 'labels': list(map(lambda x: x, score)),
+                                 'data': list(map(lambda x: score[x], score)), 'line_name': 'Media',
+                                 'line_data': list(map(lambda x: 5, score))})
+    return json(response)
+
+
+@api.route('/get_year_scores', methods=['POST'])
+def get_year_scores(request: Request) -> json:
+    response = []
+    user = get_user_info(request)
+    years = list(map(lambda x: x['value'], request.json))
+    for year in years:
+        subjects, averages = [], []
+        for score in user['content'][year]['scores']:
+            for subject, average in score.items():
+                subjects.append(subject)
+                averages.append(average['Average'])
+        subjects.append('Average')
+        averages.append(user['content'][year]['Average'])
+        response.append({'name': year, 'labels': subjects, 'data': averages, 'line_name': 'Class Average',
+                         'line_data': get_subject_average(year)})
     return json(response)

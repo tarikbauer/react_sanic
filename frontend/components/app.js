@@ -16,20 +16,25 @@ export default class App extends Component {
 
     componentWillMount() {
         this.setState({loading: true});
-        this.change_menu().then(() => this.setState({loading: false})).catch(error => console.log(error));
+        this.change_menu().then(() => this.setState({loading: false}))
+            .catch(error => {console.log(error); window.location.replace('/home')});
     }
 
     change_menu() {
         return new Promise((resolve, reject) => {
             this.request.post('is_authenticated', {}).then((response) => {
             if (response)
-                this.setState({menu: <LoggedInMenu username={Cookies.get('username')}/>});
+                { // noinspection JSUnresolvedFunction
+                    this.setState({menu: <LoggedInMenu name={Cookies.get('name')}/>});
+                }
             else
                 this.setState({menu: <LoggedOutMenu/>});
-        }).catch((error) => console.log(error)).then(response => resolve(response)).catch(error => reject(error))});
+        }).catch((error) => {console.log(error); window.location.replace('/home')})
+                .then(response => resolve(response)).catch(error => reject(error))});
     }
 
     render() {
+        // noinspection JSUnresolvedFunction
         Alert.closeAll();
         this.state.loading ? this.menu = null : this.menu = this.state.menu;
         return (

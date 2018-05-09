@@ -1,6 +1,19 @@
+import hashlib
 from .config import Config
 from datetime import datetime
 from sanic.request import Request
+
+
+def encrypt_password(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
+
+
+def get_user_info(request: Request) -> dict:
+    token = request.cookies.get('token')
+    response = Config.current.tokens.find_one({'_id': token})
+    if not response:
+        return {}
+    return Config.current.users.find_one({'_id': response['user_id']})
 
 
 def authenticate(request: Request) -> tuple:
@@ -36,3 +49,20 @@ def is_cpf_valid(cpf: str) -> bool:
     if first_verifier != cpf[-2] or second_verifier != cpf[-1]:
         return False
     return True
+
+
+def get_subject_average(year: str) -> list:
+    response = []
+    users = list(Config.current.users.find({}))
+    for user in users:
+        user_average = []
+        for score in user['content'][year]['scores']:
+            for subject, average in score.items():
+                user_average.append(average['Average'])
+        user_average.append(user['content'][year]['Average'])
+        if not response:
+            response = user_average.copy()
+        else:
+            response = [x + y for x, y in zip(response, user_average)]
+    response = list(map(lambda x: round(x/len(users), 2), response))
+    return response

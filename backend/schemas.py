@@ -8,10 +8,12 @@ def validate_cpf(cpf: str):
 
 
 class Login(Schema):
-    cpf = fields.String(required=True, validate=validate_cpf)
+    usercode = fields.String(required=True)
     password = fields.String(required=True)
 
 
 class Register(Login):
+    name = fields.String(required=True)
+    military_name = fields.String(required=True)
     email = fields.Email(required=True)
-    username = fields.String(required=True)
+    cpf = fields.String(required=True, validate=validate_cpf)
