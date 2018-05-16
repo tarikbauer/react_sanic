@@ -8,7 +8,7 @@ import App from '../components/app';
 import Home from '../components/home';
 import Login from '../components/login';
 import Register from '../components/register';
-import UserHome from '../components/user_home';
+import Main from '../components/main';
 
 ReactDOM.render(<BrowserRouter>
                     <App>
@@ -16,7 +16,7 @@ ReactDOM.render(<BrowserRouter>
                             <Route exact path="/" render={() => <Home text="Welcome Home"/>}/>
                             <Route exact path="/login" component={Login}/>
                             <Route exact path="/register" component={Register}/>
-                            <Route exact path="/home" component={UserHome}/>
+                            <Route exact path="/home" component={Main}/>
                             <Route render={() => <Home text="Page not found"/>}/>
                         </Switch>
                     </App>

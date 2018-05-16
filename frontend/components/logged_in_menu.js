@@ -17,7 +17,7 @@ export default class LoggedInMenu extends Component{
             // noinspection JSUnresolvedFunction
             Cookies.remove('token');
             // noinspection JSUnresolvedFunction
-            Cookies.remove('name');
+            Cookies.remove('username');
             window.location.replace('/')
         }).catch((error) => {console.log(error); window.location.replace('/home')})
     }
@@ -25,7 +25,7 @@ export default class LoggedInMenu extends Component{
    render(){
        return (
            <div className="collapse navbar-collapse" id="navbar-content">
-               <Link className="navbar-brand navbar-center" to="/home">Welcome {this.props.name}</Link>
+               <Link className="navbar-brand navbar-center" to="/home">Welcome {this.props.username}</Link>
                <ul className="navbar-nav mr-auto"/>
                <a className="btn btn-outline-info" href="" onClick={event => this.make_post(event)}>
                    <i className="fa fa-sign-out"/> Logout

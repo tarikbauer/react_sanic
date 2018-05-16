@@ -30,7 +30,7 @@ export default class Login extends Component {
                 // noinspection JSUnresolvedFunction
                 Cookies.set('token', response.token, {expires: 1});
                 // noinspection JSUnresolvedFunction
-                Cookies.set('name', response.name, {expires: 1});
+                Cookies.set('username', response.username, {expires: 1});
                 window.location.replace('/home')
             }
         }).catch((error) => {console.log(error); window.location.replace('/home')})

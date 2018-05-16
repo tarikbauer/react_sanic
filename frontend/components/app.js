@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
-import Cookies from "js-cookie";
+import Cookies from 'js-cookie';
 import Alert from 'react-s-alert';
-import Request from "../helpers/request";
+import Request from '../helpers/request';
 import LoggedInMenu from './logged_in_menu';
 import LoggedOutMenu from './logged_out_menu';
 
@@ -25,7 +25,7 @@ export default class App extends Component {
             this.request.post('is_authenticated', {}).then((response) => {
             if (response)
                 { // noinspection JSUnresolvedFunction
-                    this.setState({menu: <LoggedInMenu name={Cookies.get('name')}/>});
+                    this.setState({menu: <LoggedInMenu username={Cookies.get('username')}/>});
                 }
             else
                 this.setState({menu: <LoggedOutMenu/>});

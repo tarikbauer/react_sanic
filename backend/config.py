@@ -7,5 +7,6 @@ class Config:
     def __init__(self, config: dict):
         client = MongoClient(host=config['mongodb']['host'], port=config['mongodb']['port'],
                              connect=False).get_database(config['mongodb']['database'])
+        self.admins = client.get_collection('admins')
         self.users = client.get_collection('users')
         self.tokens = client.get_collection('tokens')

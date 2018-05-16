@@ -25,13 +25,15 @@ export default class UserHome extends Component {
             if (this.state.selected_target.label !== 'Faults' && this.state.selected_filters.length === 0)
                 show_error('Unfilled input');
             else {
-                this.request.post(this.state.selected_target.value, this.state.selected_filters).then(response => {
+                this.request.post(this.state.selected_target.value, {data: this.state.selected_filters}).then(
+                    response => {
                     if (response.hasOwnProperty('alert')) {
                         response.alert.map(alert => show_error(alert))
                     }
                     else if (this.state.selected_target.value === 'get_faults') {
                         this.setState({
-                            faults: <FaultsChart name={response.name} labels={response.labels} data={response.data}/>
+                            faults: <FaultsChart name={response.name} labels={response.labels} data={response.data}
+                            class="col-12 margin-top-25"/>
                         })
                     }
                     else {
@@ -40,12 +42,11 @@ export default class UserHome extends Component {
                         (this.state.selected_target.value === 'get_year_scores') ? class_name = 'col-12 margin-top-25' :
                             class_name = 'col-6 margin-top-25';
                         response.map(value => {
-                            new_score = this.state.scores.concat(<ScoresChart name={value.name} data={value.data}
-                                                                              labels={value.labels} class={class_name}
-                                                                              line_name={value.line_name}
-                                                                              line_data={value.line_data}/>);
-                            this.setState({scores: new_score})
+                            new_score = new_score.concat(<ScoresChart
+                                name={value.name} data={value.data} labels={value.labels} class={class_name}
+                                line_name={value.line_name} line_data={value.line_data}/>)
                         });
+                        this.setState({scores: new_score})
                     }
                 }).catch(error => {console.log(error); window.location.replace('/home')});
             }

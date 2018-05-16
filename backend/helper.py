@@ -8,12 +8,8 @@ def encrypt_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
 
-def get_user_info(request: Request) -> dict:
-    token = request.cookies.get('token')
-    response = Config.current.tokens.find_one({'_id': token})
-    if not response:
-        return {}
-    return Config.current.users.find_one({'_id': response['user_id']})
+def get_user_info(usercode: str) -> dict:
+    return Config.current.users.find_one({'_id': usercode})
 
 
 def authenticate(request: Request) -> tuple:

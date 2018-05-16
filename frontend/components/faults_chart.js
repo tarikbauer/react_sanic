@@ -6,7 +6,7 @@ export default class FaultsChart extends Component {
     render() {
         let options = {responsive: true, scales: {yAxes: [{stacked: true, ticks: {min: 0, stepSize: 20, max: 120}}]}};
         return (
-            <div className="col-12 margin-top-25">
+            <div className={this.props.class}>
                 <Line data={{labels: this.props.labels, datasets: [{label: this.props.name,
                         fill: false, lineTension: 0.1, backgroundColor: 'rgba(75,192,192,0.4)',
                         borderColor: 'rgba(75,192,192,1)', borderCapStyle: 'butt', borderDash: [],
