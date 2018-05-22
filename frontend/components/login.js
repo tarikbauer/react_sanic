@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import $ from 'jquery';
 import Cookies from 'js-cookie';
 import Request from '../helpers/request';
-import show_error from '../helpers/utils';
+import show_error from '../helpers/alert';
 
 export default class Login extends Component {
 

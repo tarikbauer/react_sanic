@@ -1,5 +1,6 @@
 .elasticbeanstalk
 .idea
+.git
 venv
 frontend/.cache
 frontend/node_modules

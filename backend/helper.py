@@ -47,6 +47,22 @@ def is_cpf_valid(cpf: str) -> bool:
     return True
 
 
+def get_test_average(subject: str) -> list:
+    response = []
+    users = list(Config.current.users.find({}))
+    for user in users:
+        user_average = []
+        for year, content in user['content'].items():
+            for scores in list(filter(lambda x: list(x.keys())[0] == subject, content['scores'])):
+                for subject, score in scores.items():
+                    user_average = list(map(lambda x: score[x], score))
+        if not response:
+            response = user_average.copy()
+        else:
+            response = [x + y for x, y in zip(response, user_average)]
+    return list(map(lambda x: round(x/len(users), 2), response))
+
+
 def get_subject_average(year: str) -> list:
     response = []
     users = list(Config.current.users.find({}))
@@ -60,5 +76,4 @@ def get_subject_average(year: str) -> list:
             response = user_average.copy()
         else:
             response = [x + y for x, y in zip(response, user_average)]
-    response = list(map(lambda x: round(x/len(users), 2), response))
-    return response
+    return list(map(lambda x: round(x/len(users), 2), response))

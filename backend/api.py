@@ -1,7 +1,7 @@
 import uuid
 from .config import Config
 from .generate_content import generate_content
-from .helper import authenticate, parse_errors, encrypt_password, get_user_info, get_subject_average
+from .helper import authenticate, parse_errors, encrypt_password, get_user_info, get_subject_average, get_test_average
 from .schemas import Login, Register, Usercode
 from datetime import datetime
 from sanic import Blueprint
@@ -121,7 +121,8 @@ def get_faults(request: Request) -> json:
         years = list(map(lambda x: x, user['content']))
         for year in years:
             data.append(user['content'][year]['faults'])
-        response = {'name': 'Faults', 'labels': years, 'data': data}
+        response = {'name': 'Faults', 'labels': years, 'data': data, 'minimum_name': 'Media',
+                    'minimum_data': list(map(lambda x: 120, data))}
         return json(response)
     return json({'alert': parse_errors(errors)}, 403)
 
@@ -139,9 +140,10 @@ def get_subject_scores(request: Request) -> json:
         for year, content in user['content'].items():
             for scores in list(filter(lambda x: list(x.keys())[0] in subjects, content['scores'])):
                 for subject, score in scores.items():
-                    response.append({'name': subject, 'labels': list(map(lambda x: x, score)),
-                                     'data': list(map(lambda x: score[x], score)), 'line_name': 'Media',
-                                     'line_data': list(map(lambda x: 5, score))})
+                    response.append({'name': subject, 'labels': list(map(lambda x: x, score)), 'minimum_name': 'Media',
+                                     'data': list(map(lambda x: score[x], score)),
+                                     'average_data': get_test_average(subject), 'average_name': 'Class Average',
+                                     'minimum_data': list(map(lambda x: 5, score))})
         return json(response)
     return json({'alert': parse_errors(errors)}, 403)
 
@@ -164,7 +166,8 @@ def get_year_scores(request: Request) -> json:
                     averages.append(average['Average'])
             subjects.append('Average')
             averages.append(user['content'][year]['Average'])
-            response.append({'name': year, 'labels': subjects, 'data': averages, 'line_name': 'Class Average',
-                             'line_data': get_subject_average(year)})
+            response.append({'name': year, 'labels': subjects, 'data': averages, 'average_name': 'Class Average',
+                             'average_data': get_subject_average(year), 'minimum_name': 'Media',
+                             'minimum_data': list(map(lambda x: 5, averages))})
         return json(response)
     return json({'alert': parse_errors(errors)}, 403)

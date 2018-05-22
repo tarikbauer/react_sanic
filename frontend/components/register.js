@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import $ from 'jquery';
 import Cookies from 'js-cookie';
 import Request from '../helpers/request';
-import show_error from '../helpers/utils';
+import show_error from '../helpers/alert';
 
 export default class Register extends Component {
 
@@ -67,7 +67,8 @@ export default class Register extends Component {
                 </div>
                 <div className="form-check form-check-inline margin-bottom-15">
                     <input className="form-check-input radio" type="radio" name="radio" id="reserva_radio"
-                           value="reserva" checked={!this.state.radio} onClick={() => this.setState({radio: false})}/> Reserva
+                           value="reserva" checked={!this.state.radio}
+                           onClick={() => this.setState({radio: false})}/> Reserva
                 </div>
                 <div className="form-group">
                     <input type="text" className="form-control" id="username" placeholder={placeholder}/>
